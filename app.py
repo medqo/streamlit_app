@@ -2,13 +2,23 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-st.set_page_config(page_title="消費者物価指数（2020年基準）", layout="wide", page_icon=":chart_with_upwards_trend:")
+# ===============
+# 基本設定
+# ===============
+st.set_page_config(
+    page_title="消費者物価指数（2020年基準）",
+    layout="wide",
+    page_icon=":chart_with_upwards_trend:",
+)
 
 st.title("消費者物価指数（2020年基準）")
 st.caption("e-Stat 公開データ（2020年6月~2025年12月における半年ごとのデータ）")
 
 df = pd.read_csv("cpi_data.csv")
 
+# ===============
+# 前処理
+# ===============
 # *地域名（コード除去）
 df["地域名"] = df["地域（2020年基準）"].str.strip()
 
@@ -22,18 +32,12 @@ df["月"] = df["時間軸（年・月）"].str.extract(r"(\d{1,2})月").astype(i
 df["指数"] = pd.to_numeric(df["指数"], errors="coerce")
 df["前年同月比【%】"] = pd.to_numeric(df["前年同月比【%】"], errors="coerce")
 
-# 数値列を数値型に
-df["指数"] = pd.to_numeric(df["指数"], errors="coerce")
-df["前年同月比【%】"] = pd.to_numeric(df["前年同月比【%】"], errors="coerce")
-
 # *並び順を安定させる
 df = df.sort_values(["年", "月"])
 
-df["時間軸コード"] = df["時間軸（年・月） コード"].astype(int)
-
-# =========================
-# サイドバー（表示モード選択）
-# =========================
+# ===============
+# サイドバー
+# ===============
 with st.sidebar:
     st.subheader("表示設定")
 
@@ -70,9 +74,9 @@ with st.sidebar:
             value=(int(df["年"].min()), int(df["年"].max())),
         )
 
-# =========================
+# ===============
 # データ抽出
-# =========================
+# ===============
 if option == "指数・前年同月比":
     df_bar = df[
         (df["品目名"] == item)
@@ -113,6 +117,9 @@ with tab1:
         )
 
 with tab2:
+    # ----------
+    # 指数・前年同月比
+    # ----------
     if option == "指数・前年同月比":
         st.subheader(f"{year}年{term}の状況")
 
@@ -138,8 +145,22 @@ with tab2:
                 text="値",
                 title=f"{area} - {item}",
             )
+            fig_bar.update_xaxes(
+                range=(-10, 140),
+                dtick=10,
+                showgrid=True,
+                gridcolor="rgba(0,0,0,0.2)",
+                gridwidth=0.5,
+                zeroline=True,
+                zerolinewidth=0.5,
+                zerolinecolor="black",
+                mirror=True,
+            )
             st.plotly_chart(fig_bar, use_container_width=True)
 
+    # ----------
+    # 時間推移
+    # ----------
     else:
         st.subheader("消費者物価指数の推移（半年ごと）")
 
@@ -157,6 +178,13 @@ with tab2:
                     "指数": "消費者物価指数（2020年=100）",
                     "地域名": "地域",
                 },
+            )
+            fig_line.update_xaxes(
+                ticks="inside",
+                tickwidth=1,
+                tickcolor="rgba(0,0,0,0.2)",
+                ticklen=6,
+                mirror=True,
             )
             st.plotly_chart(fig_line, use_container_width=True)
 
