@@ -2,8 +2,10 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+st.set_page_config(page_title="消費者物価指数（2020年基準）", layout="wide", page_icon=":chart_with_upwards_trend:")
+
 st.title("消費者物価指数（2020年基準）")
-st.caption("e-Stat 公開データ（6月・12月の半年データ）")
+st.caption("e-Stat 公開データ（2020年6月~2025年12月における半年ごとのデータ）")
 
 df = pd.read_csv("cpi_data.csv")
 
